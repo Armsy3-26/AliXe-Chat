@@ -16,6 +16,7 @@ app.config['SECRET_KEY'] = 'terrible secret key'
 
 socketio  = SocketIO(app, cors_allowed_origins="*")
 
+#stores connected devices with there random id's
 session_ids  = {}
 #will be used to notify users when a managerial system goes online
 user_admin_outreaches = {}
@@ -145,7 +146,7 @@ def status_request(payload):
         
     
             
-#send receipts notifications
+#send receipts notifications or reservations
 @socketio.on('notification')
 
 def notifyReceipt(payload):
@@ -161,7 +162,12 @@ def notifyReceipt(payload):
     except Exception as e:
         #print(e)
         pass
-            
+
+ #menu update notification, it will be sent to active users in the respesctive restaurants           
+@socketio.on('menustatus')
+def onMenuUpdate():
+    pass
+
 @socketio.on('disconnect')
 def ondisconnect():
     #specify clients to get offline using message ids

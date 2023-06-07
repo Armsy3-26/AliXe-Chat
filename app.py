@@ -19,6 +19,7 @@ socketio  = SocketIO(app, cors_allowed_origins="*")
 #stores connected devices with there random id's
 session_ids  = {}
 #will be used to notify users when a managerial system goes online
+#user_admin_outreaches has {"client": "restaurant_connected_to"}
 user_admin_outreaches = {}
 
 #on connect a session id for the connected client is sent back to the client
@@ -163,10 +164,28 @@ def notifyReceipt(payload):
         #print(e)
         pass
 
- #menu update notification, it will be sent to active users in the respesctive restaurants           
+#menu update notification, it will be sent to active users in the respesctive restaurants  
+menu_users = []
+         
 @socketio.on('menustatus')
-def onMenuUpdate():
-    pass
+def onMenuUpdate(payload):
+    menu_users.clear()
+    #get the restaurant name(restaurant which has had it's menu updated)
+    restaurant_name = payload['restaurant']
+    print(restaurant_name)
+    try:
+        for k,v in user_admin_outreaches.items():
+            if v == restaurant_name:
+                menu_users.append(k)
+        
+        for k,v in session_ids.items():
+            if k in menu_users:
+                
+                emit("menustatus", payload, room=v)
+                
+
+    except Exception  as e:
+        print("Error occurred onmenuupdate function")
 
 @socketio.on('disconnect')
 def ondisconnect():
@@ -189,7 +208,7 @@ def ondisconnect():
             emit("connectionstatus", connection_payload, room=receiver_session_id)
             
             user_admin_outreaches.pop(disconnected_client[0])
-        
+            
     for k,v in user_admin_outreaches.items():
         
         if v == disconnected_client[0]:

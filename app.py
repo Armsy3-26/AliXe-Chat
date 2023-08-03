@@ -7,7 +7,7 @@ Created on Wed Dec  7 13:58:57 2022
 """
 
 import os
-from flask import Flask, request
+from flask import Flask, request,jsonify,Response
 from flask_socketio import SocketIO, emit, send
 
 
@@ -146,14 +146,13 @@ def status_request(payload):
             emit('statusRequest', payload, room=client_session_id)
         
     
-            
 #send receipts notifications or reservations
 @socketio.on('notification')
 
 def notifyReceipt(payload):
     
     try:
-      
+        #print(payload)
         receiver_session_id  = session_ids[payload['receiver']]
         
         payload = {"notification": payload['receiptType'] }
@@ -183,9 +182,29 @@ def onMenuUpdate(payload):
                 
                 emit("menustatus", payload, room=v)
                 
-
     except Exception  as e:
-        print("Error occurred onmenuupdate function")
+        pass
+        #print("Error occurred on menu update function")
+
+#create a dedicated route for payment confirmation
+@app.route('/confirm/payment', methods=['POST'])
+def payment_webhook():
+
+    data = request.get_json()['payload']
+    try:
+        receiver_session_id  = session_ids[data['restaurant']]
+            
+        payload = {"payment": {"user": data['user'], "amount": data['amount']} }
+        
+        #the emit function is not present in regular flask routes: so must include socketio.emit
+        socketio.emit('payment', payload, room=receiver_session_id)
+        
+        return jsonify({"status": "success"})
+    except Exception as e:
+        
+        return jsonify({"status": "error"})
+
+
 
 @socketio.on('disconnect')
 def ondisconnect():

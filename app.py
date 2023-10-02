@@ -171,7 +171,7 @@ def onMenuUpdate(payload):
     menu_users.clear()
     #get the restaurant name(restaurant which has had it's menu updated)
     restaurant_name = payload['restaurant']
-    print(restaurant_name)
+    #print(restaurant_name)
     try:
         for k,v in user_admin_outreaches.items():
             if v == restaurant_name:
@@ -193,8 +193,8 @@ def payment_webhook():
     data = request.get_json()['payload']
     try:
         receiver_session_id  = session_ids[data['restaurant']]
-            
-        payload = {"payment": {"user": data['user'], "amount": data['amount']} }
+            #data = {"payload": {"receipt_id":receipt_id , "user": username, "amount": get_amount, "restaurant": 'Future Restaurant'}}
+        payload = {"payment": {"user": data['user'], "receipt_id": data[['receipt_id']],"amount": data['amount']} }
         
         #the emit function is not present in regular flask routes: so must include socketio.emit
         socketio.emit('payment', payload, room=receiver_session_id)

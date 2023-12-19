@@ -186,26 +186,6 @@ def onMenuUpdate(payload):
         pass
         #print("Error occurred on menu update function")
 
-#create a dedicated route for payment confirmation
-@app.route('/confirm/payment', methods=['POST'])
-def payment_webhook():
-
-    data = request.get_json()['payload']
-    try:
-        receiver_session_id  = session_ids[data['restaurant']]
-            #data = {"payload": {"receipt_id":receipt_id , "user": username, "amount": get_amount, "restaurant": 'Future Restaurant'}}
-        payload = {"payment": {"user": data['user'], "receipt_id": data[['receipt_id']],"amount": data['amount']} }
-        
-        #the emit function is not present in regular flask routes: so must include socketio.emit
-        socketio.emit('payment', payload, room=receiver_session_id)
-        
-        return jsonify({"status": "success"})
-    except Exception as e:
-        
-        return jsonify({"status": "error"})
-
-
-
 @socketio.on('disconnect')
 def ondisconnect():
     #specify clients to get offline using message ids
@@ -238,6 +218,45 @@ def ondisconnect():
             emit('connectionstatus', payload, room=user_session_id)
             
     disconnected_client.clear()
+"""
+    THE FOLLOWING ARE DEDICATED ROUTES THAT CAN BE USED TO SEND REAL TIME NOTIFICATIONS FROM THE BACKEND.
+"""
+#create a dedicated route to send receipt notifications from the web
+@app.route('/confirm/receipt', methods=['POST'])
+def cash_receipt_webhook():
+    
+    try:
+        data = request.get_json()['payload']
+
+        receiver_session_id  = session_ids[data['restaurant']]
+
+        payload = {"notification": 'dinein' }
+        
+        socketio.emit('notification', payload, room=receiver_session_id)
+
+        return jsonify({"status": "success"})
+
+    except Exception as e:
+        
+        return jsonify({"status": "error"})
+        
+#create a dedicated route for payment confirmation
+@app.route('/confirm/payment', methods=['POST'])
+def payment_webhook():
+
+    data = request.get_json()['payload']
+    try:
+        receiver_session_id  = session_ids[data['restaurant']]
+            #data = {"payload": {"receipt_id":receipt_id , "user": username, "amount": get_amount, "restaurant": 'Future Restaurant'}}
+        payload = {"payment": {"user": data['user'], "receipt_id": data[['receipt_id']],"amount": data['amount']} }
+        
+        #the emit function is not present in regular flask routes: so must include socketio.emit
+        socketio.emit('payment', payload, room=receiver_session_id)
+        
+        return jsonify({"status": "success"})
+    except Exception as e:
+        
+        return jsonify({"status": "error"})
     
 """    
 #tries to restore a conversation
@@ -287,7 +306,9 @@ def restoreConvo(payload):
             pass"""
     
 
-
+if __name__ == '__main__':
+    socketio.run(app, host='0.0.0.0', port=5000)
+  
 
 
 

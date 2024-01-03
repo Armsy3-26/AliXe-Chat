@@ -243,12 +243,13 @@ def cash_receipt_webhook():
 #create a dedicated route for payment confirmation
 @app.route('/confirm/payment', methods=['POST'])
 def payment_webhook():
-
+    
     data = request.get_json()['payload']
+
     try:
         receiver_session_id  = session_ids[data['restaurant']]
             #data = {"payload": {"receipt_id":receipt_id , "user": username, "amount": get_amount, "restaurant": 'Future Restaurant'}}
-        payload = {"payment": {"user": data['user'], "receipt_id": data[['receipt_id']],"amount": data['amount']} }
+        payload = {"payment": {"user": data['user'], "receipt_id": data['receipt_id'],"amount": data['amount']} }
         
         #the emit function is not present in regular flask routes: so must include socketio.emit
         socketio.emit('payment', payload, room=receiver_session_id)
@@ -307,7 +308,7 @@ def restoreConvo(payload):
     
 
 if __name__ == '__main__':
-    socketio.run(app, host='0.0.0.0', port=5000)
+    socketio.run(app, host='0.0.0.0', port=3000)
   
 
 

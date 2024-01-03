@@ -1,21 +1,12 @@
-user_admin_outreaches  = {"Armsy": "restraunt1", "armsy2": "restaurant2", "armsy3": "restaurant3", "fakii": "restraunt1"}
+import requests
 
-session_ids = {"Armsy": "session_army", "armsy2": "session_army","armsy3": "session_army", "fakii": "session_fakii"}
+data = {"payload": {"receipt_id":'receipt_id' , "user": 'username', "amount": 'get_amount', "restaurant": 'restaurant_name'}}
+                
+# URL of the Flask-SocketIO app's webhook endpoint
+webhook_url = 'http://51.255.62.21:3000/confirm/payment'  # socketio-real time url
 
+# Send the webhook message
+response = requests.post(webhook_url, json=data)
 
-menu_users = []
-
-def get_payload(payload):
-
-    restaurant_name  = payload['restaurant']
-
-    for k,v in user_admin_outreaches.items():
-        if v == restaurant_name:
-            menu_users.append(k)
-    
-    for k,v in session_ids.items():
-        if k in menu_users:
-            print(v)
-            
-
-get_payload({"restaurant": "restraunt1"})
+# Handle the response from the Flask-SocketIO app (if needed)
+print(response.json())
